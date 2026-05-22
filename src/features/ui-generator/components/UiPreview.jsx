@@ -174,7 +174,7 @@ export default function UiPreview({
               {userName || '이름'} ▶
             </span>
             <p className="text-sm font-black text-slate-800 leading-relaxed break-keep pr-8 tracking-wide">
-              "{characterQuote}"
+              {characterQuote}
             </p>
             <span className={`absolute bottom-3 right-4 text-[10px] font-black ${currentTheme.text} opacity-80 animate-pulse tracking-tighter`}>TAP ▼</span>
           </div>
