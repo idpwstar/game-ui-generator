@@ -6,7 +6,6 @@ export default function UiPreview({
   vocal, dance, visual, charm,
   themeColor,
   hearts, gold, diamond, level,
-  // [추가] 외부나 설정 컴포넌트에서 fontName을 주입받아 바꿀 수 있도록 대비합니다.
   fontName 
 }) {
   
@@ -31,9 +30,6 @@ export default function UiPreview({
   };
 
   const formattedTitle = (topTitle || 'ARCH').trim().toUpperCase();
-
-  // [원하는 폰트 직접 지정 구역]
-  // 'Gamja Flower'나 구글에서 찾으신 폰트명을 여기에 적어주시면 우선 적용됩니다!
   const chosenFont = fontName || '"pretendard", sans-serif';
 
   return (
@@ -42,40 +38,39 @@ export default function UiPreview({
       style={{ 
         fontFamily: chosenFont,
         backgroundColor: currentTheme.bgHex,
-        // 렌더링 시 레이어 분리 현상을 원천 차단하기 위한 하드웨어 가속 트릭
         transform: 'translateZ(0)'
       }}
       ref={uiRef}
     >
-      {/* [🔥 상단바 깨짐 전면 수정] 
-        html2canvas가 렌더링을 실패하는 flex 구조를 폐기하고 absolute(절대 좌표) 레이아웃으로 변경했습니다. 
+      {/* [🔥 안전 장치 추가]
+        상단바 영역이 캡처 엔진 돔 복사 시 하얗게 유실되는 현상을 막기 위해 
+        가장 밑바닥에 완전 불투명한 상단바 전용 단색 배경 지지대를 absolute로 미리 깔아둡니다.
       */}
       <div 
-        className="w-full h-12 relative border-b border-white/20 z-20 block"
+        className="absolute top-0 left-0 right-0 h-12 z-0 pointer-events-none"
         style={{ backgroundColor: currentTheme.topBarBg }}
-      >
+      />
+
+      {/* 상단바 콘텐츠 레이어 */}
+      <div className="w-full h-12 relative border-b border-white/20 z-20 block">
         {/* 좌측 타이틀 (절대 위치) */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
           <span className="text-white font-black text-base tracking-wider drop-shadow-sm">★ {formattedTitle}</span>
         </div>
 
-        {/* 우측 인포 스택들 (절대 위치 및 고정 간격 배치로 정렬 오류 차단) */}
+        {/* 우측 인포 스택들 */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-4 text-sm font-extrabold text-white">
-          {/* 하트 */}
           <div className="tracking-wide text-base drop-shadow-sm">{renderHearts()}</div>
           
-          {/* 골드 */}
           <div className="bg-white/20 text-white px-3.5 py-1 rounded-full flex items-center gap-1 shadow-inner font-black min-w-[80px] justify-center">
             <span>🪙</span> <span>{gold || '0'}</span>
           </div>
           
-          {/* 다이아 */}
           <div className="bg-white/20 text-white px-3.5 py-1 rounded-full flex items-center gap-1 shadow-inner font-black min-w-[75px] justify-center">
             <span>💎</span> <span>{diamond}</span>
           </div>
           
-          {/* 레벨 */}
-          <div className="bg-white text-slate-800 px-3 py-0.5 rounded window-shadow text-[11px] font-black shadow-sm">
+          <div className="bg-white text-slate-800 px-3 py-0.5 rounded text-[11px] font-black shadow-sm">
             Lv.{level}
           </div>
         </div>
@@ -99,7 +94,7 @@ export default function UiPreview({
           </div>
 
           <div className="ml-3">
-            <span className={`bg-gradient-to-r ${currentTheme.badge} text-white text-[11px] font-black px-3 py-1 rounded-full shadow-sm tracking-wide`}>
+            <span className={`bg-gradient-to-r ${currentTheme.badge} text-white text-[11px] font-black px-3 py-1 rounded-full shadow-sm tracking-wide inline-block whitespace-nowrap`}>
               ✦ 프로필 카드
             </span>
           </div>
@@ -109,12 +104,20 @@ export default function UiPreview({
             <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{userName || '이름'} · {formattedTitle}</p>
           </div>
 
-          <div className="ml-3 flex gap-2 text-[11px] font-black">
+          {/* [🔥 배지 깨짐 전면 해결 구역]
+            태그 텍스트가 강제로 줄바꿈되거나 폭이 찌그러지지 않도록 
+            whitespace-nowrap과 flex-shrink-0 속성을 명확히 심고, 가로로 꽉 고정해 줍니다.
+          */}
+          <div className="ml-3 flex flex-row flex-wrap items-center gap-2 text-[11px] font-black">
             {positionTag1 && (
-              <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-md border border-purple-200 shadow-sm">{positionTag1}</span>
+              <span className="inline-flex items-center justify-center bg-purple-100 text-purple-700 px-3 py-1 rounded-md border border-purple-200 shadow-sm whitespace-nowrap flex-shrink-0 min-w-[55px] h-6 text-center">
+                {positionTag1}
+              </span>
             )}
             {positionTag2 && (
-              <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-md border border-amber-200 shadow-sm">{positionTag2}</span>
+              <span className="inline-flex items-center justify-center bg-amber-100 text-amber-700 px-3 py-1 rounded-md border border-amber-200 shadow-sm whitespace-nowrap flex-shrink-0 min-w-[45px] h-6 text-center">
+                {positionTag2}
+              </span>
             )}
           </div>
 
