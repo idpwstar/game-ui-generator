@@ -42,10 +42,7 @@ export default function UiPreview({
       }}
       ref={uiRef}
     >
-      {/* [🔥 안전 장치 추가]
-        상단바 영역이 캡처 엔진 돔 복사 시 하얗게 유실되는 현상을 막기 위해 
-        가장 밑바닥에 완전 불투명한 상단바 전용 단색 배경 지지대를 absolute로 미리 깔아둡니다.
-      */}
+      {/* 상단바 탈출 방지 단색 배경 지지대 */}
       <div 
         className="absolute top-0 left-0 right-0 h-12 z-0 pointer-events-none"
         style={{ backgroundColor: currentTheme.topBarBg }}
@@ -53,7 +50,7 @@ export default function UiPreview({
 
       {/* 상단바 콘텐츠 레이어 */}
       <div className="w-full h-12 relative border-b border-white/20 z-20 block">
-        {/* 좌측 타이틀 (절대 위치) */}
+        {/* 좌측 타이틀 */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
           <span className="text-white font-black text-base tracking-wider drop-shadow-sm">★ {formattedTitle}</span>
         </div>
@@ -104,21 +101,29 @@ export default function UiPreview({
             <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest mt-0.5">{userName || '이름'} · {formattedTitle}</p>
           </div>
 
-          {/* [🔥 배지 깨짐 전면 해결 구역]
-            태그 텍스트가 강제로 줄바꿈되거나 폭이 찌그러지지 않도록 
-            whitespace-nowrap과 flex-shrink-0 속성을 명확히 심고, 가로로 꽉 고정해 줍니다.
+          {/* [🔥 버그 원천 봉쇄 핵심 수정 구역]
+            html2canvas가 인라인/플렉스 너비 계산을 완전히 포기하는 현상을 해결하기 위해
+            배치를 'block'과 정적 'table/table-cell' 혹은 명시적 고정 'width'를 가진 레이아웃으로 전면 전환합니다.
+            텍스트 주변에 강제로 패딩 공백(&nbsp;)을 주어 캡처 도중 여백이 깎여도 글자가 보존되도록 안전장치를 구축했습니다.
           */}
-          <div className="ml-3 flex flex-row flex-wrap items-center gap-2 text-[11px] font-black">
+          <div className="ml-3 block relative z-30 h-7">
             {positionTag1 && (
-              <span className="inline-flex items-center justify-center bg-purple-100 text-purple-700 px-3 py-1 rounded-md border border-purple-200 shadow-sm whitespace-nowrap flex-shrink-0 min-w-[55px] h-6 text-center">
-                {positionTag1}
-              </span>
+              <div 
+                className="float-left bg-purple-100 text-purple-700 rounded-md border border-purple-200 shadow-sm text-[11px] font-black h-6 text-center overflow-hidden mr-2"
+                style={{ width: '75px', display: 'block', lineHeight: '22px', whiteSpace: 'nowrap' }}
+              >
+                &nbsp;{positionTag1}&nbsp;
+              </div>
             )}
             {positionTag2 && (
-              <span className="inline-flex items-center justify-center bg-amber-100 text-amber-700 px-3 py-1 rounded-md border border-amber-200 shadow-sm whitespace-nowrap flex-shrink-0 min-w-[45px] h-6 text-center">
-                {positionTag2}
-              </span>
+              <div 
+                className="float-left bg-amber-100 text-amber-700 rounded-md border border-amber-200 shadow-sm text-[11px] font-black h-6 text-center overflow-hidden"
+                style={{ width: '55px', display: 'block', lineHeight: '22px', whiteSpace: 'nowrap' }}
+              >
+                &nbsp;{positionTag2}&nbsp;
+              </div>
             )}
+            <div className="clear-both"></div>
           </div>
 
           {/* 세부 능력치 스택 */}
